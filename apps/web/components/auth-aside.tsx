@@ -1,4 +1,4 @@
-import { LayersIcon, MicIcon } from "@/components/icons";
+import { SlidesIcon, MicIcon } from "@/components/icons";
 
 /** Marketing panel shown beside the auth form (hidden on mobile) — matches auth_sign_in_up. */
 export function AuthAside() {
@@ -16,9 +16,9 @@ export function AuthAside() {
         </p>
         <div className="mt-8 grid grid-cols-2 gap-4">
           <div className="rounded-2xl bg-white/10 p-4 backdrop-blur">
-            <LayersIcon size={20} />
-            <p className="mt-2 text-[13.5px] font-semibold">AI Semester Hub</p>
-            <p className="text-[12px] text-white/75">Smart scheduling and assignment tracking.</p>
+            <SlidesIcon size={20} />
+            <p className="mt-2 text-[13.5px] font-semibold">Reports & PPT</p>
+            <p className="text-[12px] text-white/75">Auto-generated reports and slide decks.</p>
           </div>
           <div className="rounded-2xl bg-white/10 p-4 backdrop-blur">
             <MicIcon size={20} />

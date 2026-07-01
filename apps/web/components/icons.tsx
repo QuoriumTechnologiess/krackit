@@ -143,6 +143,12 @@ export const LayersIcon = (p: IconProps) => (
   </Base>
 );
 
+export const TrashIcon = (p: IconProps) => (
+  <Base {...p}>
+    <path d="M4 7h16M9 7V5a1 1 0 011-1h4a1 1 0 011 1v2M6 7v12a1 1 0 001 1h10a1 1 0 001-1V7M10 11v5M14 11v5" />
+  </Base>
+);
+
 export const HelpIcon = (p: IconProps) => (
   <Base {...p}>
     <circle cx="12" cy="12" r="9" />

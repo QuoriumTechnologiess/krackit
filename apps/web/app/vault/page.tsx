@@ -4,6 +4,7 @@ import type { DocumentType } from "@studentos/db";
 import { AppShell } from "@/components/app-shell";
 import { requireOnboardedUser, shellUserFrom } from "@/lib/user";
 import { SearchIcon, SlidesIcon, PencilIcon, ResumeIcon, MicIcon, CodeIcon } from "@/components/icons";
+import { DeleteDocButton } from "@/components/vault/delete-doc-button";
 
 const FILTERS = [
   { label: "All", value: "" },
@@ -127,16 +128,19 @@ export default async function VaultPage({ searchParams }: { searchParams: Promis
               const meta = TYPE_META[d.type] ?? TYPE_META.REPORT;
               const Icon = meta.icon;
               return (
-                <Link key={d.id} href={meta.href(d.id)} className="group flex flex-col rounded-2xl border border-line bg-card p-4 transition-all hover:-translate-y-1 hover:border-cyan/40 hover:shadow-[0_12px_28px_rgba(15,23,42,0.07)]">
-                  <div className="mb-4 flex items-start justify-between">
-                    <span className={`flex size-10 items-center justify-center rounded-xl ${meta.tint}`}><Icon size={19} /></span>
-                    <span className={`rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${STATUS_BADGE[d.status] ?? STATUS_BADGE.DRAFT}`}>
-                      {d.status === "READY" ? "Ready" : d.status === "GENERATING" ? "Generating" : d.status === "NEEDS_INPUT" ? "Input" : d.status === "FAILED" ? "Failed" : "Draft"}
-                    </span>
-                  </div>
-                  <p className="line-clamp-2 text-[14px] font-semibold text-ink group-hover:text-cyan">{d.title}</p>
-                  <p className="mt-auto pt-3 text-[11.5px] text-muted">Modified {relTime(d.updatedAt)}</p>
-                </Link>
+                <div key={d.id} className="group/card relative">
+                  <Link href={meta.href(d.id)} className="group flex h-full flex-col rounded-2xl border border-line bg-card p-4 transition-all hover:-translate-y-1 hover:border-cyan/40 hover:shadow-[0_12px_28px_rgba(15,23,42,0.07)]">
+                    <div className="mb-4 flex items-start justify-between">
+                      <span className={`flex size-10 items-center justify-center rounded-xl ${meta.tint}`}><Icon size={19} /></span>
+                      <span className={`rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide transition-opacity group-hover/card:opacity-0 ${STATUS_BADGE[d.status] ?? STATUS_BADGE.DRAFT}`}>
+                        {d.status === "READY" ? "Ready" : d.status === "GENERATING" ? "Generating" : d.status === "NEEDS_INPUT" ? "Input" : d.status === "FAILED" ? "Failed" : "Draft"}
+                      </span>
+                    </div>
+                    <p className="line-clamp-2 text-[14px] font-semibold text-ink group-hover:text-cyan">{d.title}</p>
+                    <p className="mt-auto pt-3 text-[11.5px] text-muted">Modified {relTime(d.updatedAt)}</p>
+                  </Link>
+                  <DeleteDocButton docId={d.id} />
+                </div>
               );
             })}
           </div>

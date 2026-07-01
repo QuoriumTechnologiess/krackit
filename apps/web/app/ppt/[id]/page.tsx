@@ -10,6 +10,7 @@ import { DeleteDocButton } from "@/components/delete-doc-button";
 import { PPT_STAGES } from "@/lib/ppt/generate";
 import { stageOf } from "@/lib/jobs";
 import { DeckViewer, type Deck } from "@/components/ppt/deck-viewer";
+import { TemplatePreview } from "@/components/ppt/template-preview";
 import { GeneratingOverlay } from "@/components/generating-overlay";
 import type { ClarifyQuestion } from "@studentos/ai";
 import type { PptTheme, PptSlide } from "@studentos/documents";
@@ -116,6 +117,12 @@ export default async function PptDetailPage({ params }: { params: Promise<{ id: 
           <div className="mt-6 rounded-xl border border-danger/25 bg-danger/10 p-4 text-[13.5px] text-danger">
             Generation failed: {doc.job?.error ?? "unknown error"}. Try generating again.
           </div>
+        ) : data.templated && hasExport ? (
+          // Template deck: show the EXACT rendered slides (matches the download); the generic
+          // canvas is only a fallback when the page-render service is unavailable.
+          <TemplatePreview docId={doc.id}>
+            <DeckViewer docId={doc.id} deck={deck} editable={false} />
+          </TemplatePreview>
         ) : (
           <DeckViewer docId={doc.id} deck={deck} editable={!data.templated} />
         )}

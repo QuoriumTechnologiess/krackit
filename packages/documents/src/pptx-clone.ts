@@ -169,7 +169,9 @@ export function fillPptxTemplate(templateBuffer: Buffer, content: PptCloneConten
   }
   zip.file("ppt/presentation.xml", serialize(pres));
 
-  const buffer = zip.generate({ type: "nodebuffer" }) as Buffer;
+  // DEFLATE (not the PizZip default STORE) so we emit a conventional, compressed .pptx —
+  // matches the report/resume writers and how PowerPoint itself packages files.
+  const buffer = zip.generate({ type: "nodebuffer", compression: "DEFLATE" }) as Buffer;
 
   // Integrity guard — must pass or the caller falls back.
   const guard = checkPptxIntegrity(buffer, [content.title, ...content.slides.map((s) => s.heading)]);

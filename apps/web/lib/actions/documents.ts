@@ -42,3 +42,28 @@ export async function deleteDocumentAction(formData: FormData): Promise<void> {
   revalidatePath("/vault");
   redirect(dest);
 }
+
+/**
+ * Delete one of the user's documents from the Vault and stay on the Vault.
+ * Same ownership check + best-effort storage cleanup as {@link deleteDocumentAction},
+ * but returns a result instead of redirecting so the Vault grid can update in place.
+ */
+export async function deleteVaultDocument(docId: string): Promise<{ ok: boolean }> {
+  const user = await getOrCreateUser();
+  if (!user || !docId) return { ok: false };
+
+  const doc = await prisma.document.findFirst({
+    where: { id: docId, ownerId: user.id },
+    select: { id: true, exports: { select: { storageKey: true } } },
+  });
+  if (!doc) return { ok: false };
+
+  // Best-effort storage cleanup — never block the delete on it.
+  await Promise.allSettled(doc.exports.map((e) => deleteObject(e.storageKey)));
+
+  await prisma.document.delete({ where: { id: doc.id } });
+
+  revalidatePath("/vault");
+  revalidatePath("/dashboard");
+  return { ok: true };
+}

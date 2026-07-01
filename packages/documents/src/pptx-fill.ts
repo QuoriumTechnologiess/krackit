@@ -80,7 +80,9 @@ export function fillPptxTemplateInPlace(
     // preserve → leave the part untouched.
   }
 
-  const buffer = zip.generate({ type: "nodebuffer" }) as Buffer;
+  // DEFLATE (not the PizZip default STORE) so we emit a conventional, compressed .pptx —
+  // matches the report/resume writers and how PowerPoint itself packages files.
+  const buffer = zip.generate({ type: "nodebuffer", compression: "DEFLATE" }) as Buffer;
 
   // Same referential integrity guard the clone path uses; confirm our injected text survived.
   const guard = checkPptxIntegrity(buffer, injected);

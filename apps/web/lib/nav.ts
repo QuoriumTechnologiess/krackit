@@ -10,7 +10,6 @@ import {
   LinkIcon,
   StarIcon,
   ArchiveIcon,
-  LayersIcon,
   HelpIcon,
 } from "@/components/icons";
 
@@ -24,7 +23,6 @@ export type NavItem = {
 
 export const WORKSPACE_NAV: NavItem[] = [
   { label: "Home", href: "/dashboard", icon: Home, mobile: true },
-  { label: "Semester Hub", href: "/semester", icon: LayersIcon, mobile: true },
   { label: "Vault", href: "/vault", icon: ArchiveIcon, mobile: true },
   { label: "Assignments", href: "/assignments", icon: PencilIcon, mobile: true },
   { label: "Reports & PPT", href: "/reports", icon: SlidesIcon, mobile: true },
