@@ -1,4 +1,4 @@
-import { SignOutButton } from "@clerk/nextjs";
+import { SignOutButtonPlain } from "@/components/sign-out-button";
 import type { AdminGuardResult } from "@/lib/admin";
 
 export function NotAuthorized({ reason }: { reason: Extract<AdminGuardResult, { ok: false }>["reason"] }) {
@@ -13,11 +13,9 @@ export function NotAuthorized({ reason }: { reason: Extract<AdminGuardResult, { 
         </p>
         {reason === "not-admin" && (
           <div className="mt-4">
-            <SignOutButton>
-              <button className="rounded-lg border border-line px-3 py-1.5 text-[12.5px] font-medium text-soft hover:bg-surface">
-                Sign out
-              </button>
-            </SignOutButton>
+            <SignOutButtonPlain className="rounded-lg border border-line px-3 py-1.5 text-[12.5px] font-medium text-soft hover:bg-surface">
+              Sign out
+            </SignOutButtonPlain>
           </div>
         )}
       </div>

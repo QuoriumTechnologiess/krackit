@@ -87,6 +87,12 @@ export function OnboardingForm({ firstName }: { firstName: string | null }) {
             </select>
           </div>
 
+          <div className="mb-4">
+            <label htmlFor="phone" className={fieldLabel}>Phone number</label>
+            <input id="phone" name="phone" type="tel" required placeholder="e.g. 9876543210" className={`${fieldBox} placeholder:text-faint`} />
+            <p className="mt-1 text-[11px] text-faint">Used only to verify you&apos;re a unique person — never shared or used for marketing.</p>
+          </div>
+
           {/* Career-goal mapping — "What's your vision?" */}
           <div className="mb-4">
             <label htmlFor="careerGoal" className={fieldLabel}>Career goal</label>

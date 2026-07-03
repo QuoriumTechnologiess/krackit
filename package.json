@@ -11,6 +11,7 @@
     "dev": "node scripts/dev.mjs",
     "dev:app": "turbo dev",
     "dev:admin": "pnpm --filter admin dev",
+    "dev:recruiter": "pnpm --filter recruiter dev",
     "dev:services": "docker compose up -d",
     "dev:down": "docker compose down",
     "build": "turbo build",

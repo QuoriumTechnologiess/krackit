@@ -82,6 +82,15 @@ enum UsageKind {
   PPT
 }
 
+// Recruiter onboarding lifecycle. DRAFT = still filling the multi-step form (resumable on
+// reconnect); PENDING = submitted, awaiting apps/admin review; APPROVED/REJECTED = decided.
+enum RecruiterStatus {
+  DRAFT
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 // ----------------------------- Core ---------------------------------------
 
 model User {
@@ -123,20 +132,33 @@ model User {
   institutionId String?
   institution   Institution? @relation(fields: [institutionId], references: [id])
 
-  workspaces      Workspace[]
-  documents       Document[]
-  uploads         Upload[]
-  subscription    Subscription?
-  usageEvents     UsageEvent[]
-  dsaAttempts     DsaAttempt[]
-  assistantThread AssistantThread?
-  deadlines       Deadline[]
-  studyPlans      StudyPlan[]
+  // Unique contact number — cross-checked against Recruiter.phone too (see
+  // packages/db/src/phone.ts) so the same person can't register twice across student/recruiter.
+  // Not used for SMS/notifications yet, only identity de-duplication at onboarding.
+  phone String? @unique
+
+  // Recruiter-side discovery — off by default (student must explicitly opt in, mirroring the
+  // publicHandle "Share Profile" flow). Gates visibility in apps/recruiter's student search only;
+  // does not affect the existing /u/[handle] public profile.
+  visibleToRecruiters   Boolean   @default(false)
+  visibleToRecruitersAt DateTime?
+
+  workspaces        Workspace[]
+  documents         Document[]
+  uploads           Upload[]
+  subscription      Subscription?
+  usageEvents       UsageEvent[]
+  dsaAttempts       DsaAttempt[]
+  assistantThread   AssistantThread?
+  deadlines         Deadline[]
+  studyPlans        StudyPlan[]
+  recruiterMessages RecruiterMessage[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([institutionId])
+  @@index([visibleToRecruiters])
 }
 
 model Institution {
@@ -406,4 +428,55 @@ model AdminAuditLog {
 
   @@index([targetType, targetId])
   @@index([createdAt])
+}
+
+// ----------------------------- Recruiter -----------------------------------
+
+// A recruiter account (apps/recruiter). Distinct from `User` (students) — recruiters never get a
+// student row. Clerk `publicMetadata.role: "recruiter"` is only granted once `status` flips to
+// APPROVED (set from apps/admin's verification queue), so it can't be self-assigned.
+model Recruiter {
+  id              String          @id @default(cuid())
+  clerkId         String          @unique
+  email           String          @unique
+  name            String?
+  // Cross-checked against User.phone (packages/db/src/phone.ts) — one person, one identity,
+  // whether they sign up as a student or a recruiter.
+  phone           String?         @unique
+  companyName     String?
+  companyEmail    String?
+  // Free-text industry/domain the recruiter hires for — matched against student `careerGoal`
+  // (packages/db/src/recruiter-matching.ts). "" / null = sees all industries.
+  industry        String?
+  designation     String?
+  linkedinUrl     String?
+  status          RecruiterStatus @default(DRAFT)
+  rejectionNote   String?
+  // The reviewing admin's Clerk email (mirrors AdminAuditLog.actorEmail — no admin User relation).
+  approvedByEmail String?
+  approvedAt      DateTime?
+
+  messages  RecruiterMessage[]
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+
+  @@index([status])
+  @@index([industry])
+}
+
+// A recruiter → student direct message. One-directional by design (v1): students read and reply
+// via a normal reply, but recruiters cannot be messaged back through a separate student->recruiter
+// row here — see apps/web's inbox, which only reads, never writes, this table.
+model RecruiterMessage {
+  id          String    @id @default(cuid())
+  recruiterId String
+  recruiter   Recruiter @relation(fields: [recruiterId], references: [id], onDelete: Cascade)
+  studentId   String
+  student     User      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  body        String
+  readAt      DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([studentId, createdAt])
+  @@index([recruiterId, createdAt])
 }

@@ -27,6 +27,9 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
               <Link href="/templates" className="hover:text-ink">
                 Templates
               </Link>
+              <Link href="/recruiters" className="hover:text-ink">
+                Recruiters
+              </Link>
               <Link href="/dsa-problems" className="hover:text-ink">
                 DSA
               </Link>

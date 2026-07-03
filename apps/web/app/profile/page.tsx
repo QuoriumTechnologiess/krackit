@@ -6,6 +6,7 @@ import { getDsaProgress } from "@/lib/dsa/practice";
 import { getLeaderboard } from "@/lib/dsa/leaderboard";
 import { getResume } from "@/lib/resume/generate";
 import { ShareProfileButton } from "@/components/profile/share-button";
+import { RecruiterVisibilityToggle } from "@/components/profile/recruiter-visibility-toggle";
 import { ResumeIcon } from "@/components/icons";
 
 export const metadata = { title: "Profile — Vidyas OS" };
@@ -54,7 +55,10 @@ export default async function ProfilePage() {
                 ) : null}
               </div>
             </div>
-            <ShareProfileButton />
+            <div className="flex flex-col items-stretch gap-2 sm:items-end">
+              <ShareProfileButton />
+              <RecruiterVisibilityToggle initialVisible={user.visibleToRecruiters} />
+            </div>
           </div>
 
           {/* Stats */}
