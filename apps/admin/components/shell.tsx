@@ -38,6 +38,9 @@ export async function AdminShell({ children }: { children: React.ReactNode }) {
               <Link href="/recruiters" className="hover:text-ink">
                 Recruiters
               </Link>
+              <Link href="/support" className="hover:text-ink">
+                Support
+              </Link>
               <Link href="/dsa-problems" className="hover:text-ink">
                 DSA
               </Link>

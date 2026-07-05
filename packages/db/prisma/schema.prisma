@@ -203,6 +203,7 @@ model User {
   studyPlans         StudyPlan[]
   recruiterMessages  RecruiterMessage[]
   interviewSchedules InterviewSchedule[]
+  supportTickets     SupportTicket[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -544,10 +545,11 @@ model Recruiter {
   approvedByEmail String?
   approvedAt      DateTime?
 
-  messages  RecruiterMessage[]
-  schedules InterviewSchedule[]
-  createdAt DateTime            @default(now())
-  updatedAt DateTime            @updatedAt
+  messages       RecruiterMessage[]
+  schedules      InterviewSchedule[]
+  supportTickets SupportTicket[]
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
 
   @@index([status])
   @@index([industry])
@@ -574,6 +576,42 @@ model RecruiterMessage {
 enum MessageDirection {
   RECRUITER_TO_STUDENT
   STUDENT_TO_RECRUITER
+}
+
+// A help-desk ticket raised by a student or recruiter, reviewed by apps/admin. Exactly one of
+// studentId/recruiterId is set depending on who raised it. Deliberately flat (no threaded replies)
+// — the admin's "corrective action" is usually a separate existing admin tool (suspend, reset
+// quota, approve/reject) on that user/recruiter's own page; adminNote just records what was done.
+model SupportTicket {
+  id            String             @id @default(cuid())
+  requesterType SupportRequesterType
+  studentId     String?
+  student       User?              @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  recruiterId   String?
+  recruiter     Recruiter?         @relation(fields: [recruiterId], references: [id], onDelete: Cascade)
+  subject       String
+  message       String
+  status        SupportTicketStatus @default(OPEN)
+  adminNote     String?
+  resolvedAt    DateTime?
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+
+  @@index([status, createdAt])
+  @@index([studentId])
+  @@index([recruiterId])
+}
+
+enum SupportRequesterType {
+  STUDENT
+  RECRUITER
+}
+
+enum SupportTicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
 }
 
 // A recruiter-proposed REAL interview slot with a student — separate from the student's own

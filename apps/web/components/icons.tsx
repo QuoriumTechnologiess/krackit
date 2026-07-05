@@ -163,3 +163,11 @@ export const HelpIcon = (p: IconProps) => (
     <path d="M12 17h.01" />
   </Base>
 );
+
+export const SupportIcon = (p: IconProps) => (
+  <Base {...p}>
+    <circle cx="12" cy="12" r="9" />
+    <circle cx="12" cy="12" r="3.5" />
+    <path d="M5.6 5.6l3 3M18.4 5.6l-3 3M5.6 18.4l3-3M18.4 18.4l-3-3" />
+  </Base>
+);

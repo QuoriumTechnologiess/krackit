@@ -1,3 +1,4 @@
+import { prisma } from "@studentos/db";
 import { AppShell } from "@/components/app-shell";
 import { requireOnboardedUser, shellUserFrom } from "@/lib/user";
 import { quotaStatus } from "@/lib/entitlements";
@@ -10,6 +11,9 @@ const PLAN_LABEL: Record<string, string> = { FREE: "Free", PRO: "Pro", PREMIUM: 
 export default async function SettingsPage() {
   const user = await requireOnboardedUser();
   const plan = PLAN_LABEL[user.plan] ?? "Free";
+  const institution = user.institutionId
+    ? await prisma.institution.findUnique({ where: { id: user.institutionId }, select: { name: true } })
+    : null;
 
   // Intelligence Pulse — generations used vs monthly allowance (moved off the dashboard).
   const [assignmentQ, reportQ, pptQ] = await Promise.all([
@@ -35,7 +39,15 @@ export default async function SettingsPage() {
             email: user.email,
             department: user.department,
             semester: user.semester,
+            college: institution?.name ?? null,
             careerGoal: user.careerGoal,
+            userType: user.userType,
+            companyName: user.companyName,
+            jobTitle: user.jobTitle,
+            yearsOfExperience: user.yearsOfExperience,
+            github: user.githubUrl,
+            linkedin: user.linkedin,
+            gpa: user.gpa,
             plan,
             creditsLimit: user.plan === "FREE" ? 50 : null,
             usage: { used, limit: totalLimit },

@@ -1,10 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useClerk } from "@clerk/nextjs";
 import { StarIcon, GearIcon } from "@/components/icons";
 import { useInstallPrompt } from "@/components/install-prompt";
+import { updateProfile } from "@/lib/actions/profile-edit";
+import { DEPARTMENTS, SEMESTERS } from "@/lib/constants";
 
 type Tab = "profile" | "billing" | "account";
 
@@ -13,7 +16,15 @@ export type SettingsData = {
   email: string;
   department: string | null;
   semester: string | null;
+  college: string | null;
   careerGoal: string | null;
+  userType: "STUDENT" | "PROFESSIONAL";
+  companyName: string | null;
+  jobTitle: string | null;
+  yearsOfExperience: number | null;
+  github: string | null;
+  linkedin: string | null;
+  gpa: number | null;
   plan: string;
   /** Plan allowance (FREE=limited number/month, paid=null=unlimited). Usage metering not yet tracked. */
   creditsLimit: number | null;
@@ -27,16 +38,145 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "account", label: "Account" },
 ];
 
+const fieldLabel = "text-[13px] font-medium text-muted";
+const fieldBox =
+  "w-full rounded-lg border border-line bg-surface px-4 py-2.5 text-[14px] text-ink outline-none focus:ring-2 focus:ring-cyan/20";
+
 function Field({ label, value }: { label: string; value: string }) {
   return (
     <div className="space-y-2">
-      <label className="text-[13px] font-medium text-muted">{label}</label>
-      <input
-        defaultValue={value}
-        readOnly
-        className="w-full rounded-lg border border-line bg-surface px-4 py-2.5 text-[14px] text-ink outline-none focus:ring-2 focus:ring-cyan/20"
-      />
+      <label className={fieldLabel}>{label}</label>
+      <input defaultValue={value} readOnly className={fieldBox} />
     </div>
+  );
+}
+
+function EditProfileForm({ data }: { data: SettingsData }) {
+  const router = useRouter();
+  const [name, setName] = useState(data.name);
+  const [department, setDepartment] = useState(data.department ?? "");
+  const [semester, setSemester] = useState(data.semester ?? "");
+  const [college, setCollege] = useState(data.college ?? "");
+  const [companyName, setCompanyName] = useState(data.companyName ?? "");
+  const [jobTitle, setJobTitle] = useState(data.jobTitle ?? "");
+  const [yearsOfExperience, setYearsOfExperience] = useState(
+    data.yearsOfExperience != null ? String(data.yearsOfExperience) : "",
+  );
+  const [careerGoal, setCareerGoal] = useState(data.careerGoal ?? "");
+  const [github, setGithub] = useState(data.github ?? "");
+  const [linkedin, setLinkedin] = useState(data.linkedin ?? "");
+  const [gpa, setGpa] = useState(data.gpa != null ? String(data.gpa) : "");
+  const [error, setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
+  const [pending, start] = useTransition();
+
+  function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setSaved(false);
+    start(async () => {
+      const result = await updateProfile({
+        name,
+        careerGoal,
+        github,
+        linkedin,
+        gpa: gpa.trim() ? Number(gpa) : null,
+        ...(data.userType === "PROFESSIONAL"
+          ? { companyName, jobTitle, yearsOfExperience: yearsOfExperience.trim() ? Number(yearsOfExperience) : null }
+          : { department, semester, college }),
+      });
+      if (!result.ok) {
+        setError(result.error);
+        return;
+      }
+      setSaved(true);
+      router.refresh();
+    });
+  }
+
+  return (
+    <form onSubmit={onSubmit} className="mt-10 space-y-8 border-t border-line pt-8">
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+        <div className="space-y-2">
+          <label className={fieldLabel}>Full Name</label>
+          <input value={name} onChange={(e) => setName(e.target.value)} className={fieldBox} />
+        </div>
+        <Field label="Email" value={data.email} />
+
+        {data.userType === "PROFESSIONAL" ? (
+          <>
+            <div className="space-y-2">
+              <label className={fieldLabel}>Company</label>
+              <input value={companyName} onChange={(e) => setCompanyName(e.target.value)} className={fieldBox} />
+            </div>
+            <div className="space-y-2">
+              <label className={fieldLabel}>Job Title</label>
+              <input value={jobTitle} onChange={(e) => setJobTitle(e.target.value)} className={fieldBox} />
+            </div>
+            <div className="space-y-2">
+              <label className={fieldLabel}>Years of Experience</label>
+              <input
+                type="number"
+                min={0}
+                max={60}
+                value={yearsOfExperience}
+                onChange={(e) => setYearsOfExperience(e.target.value)}
+                className={fieldBox}
+              />
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="space-y-2">
+              <label className={fieldLabel}>Department</label>
+              <select value={department} onChange={(e) => setDepartment(e.target.value)} className={fieldBox}>
+                <option value="" disabled>Select your department…</option>
+                {DEPARTMENTS.map((d) => <option key={d} value={d}>{d}</option>)}
+              </select>
+            </div>
+            <div className="space-y-2">
+              <label className={fieldLabel}>Semester</label>
+              <select value={semester} onChange={(e) => setSemester(e.target.value)} className={fieldBox}>
+                <option value="" disabled>Select…</option>
+                {SEMESTERS.map((s) => <option key={s} value={s}>Semester {s}</option>)}
+              </select>
+            </div>
+            <div className="space-y-2">
+              <label className={fieldLabel}>College / University</label>
+              <input value={college} onChange={(e) => setCollege(e.target.value)} className={fieldBox} />
+            </div>
+          </>
+        )}
+
+        <div className="space-y-2">
+          <label className={fieldLabel}>Career Goal</label>
+          <input value={careerGoal} onChange={(e) => setCareerGoal(e.target.value)} className={fieldBox} />
+        </div>
+        <div className="space-y-2">
+          <label className={fieldLabel}>GitHub</label>
+          <input value={github} onChange={(e) => setGithub(e.target.value)} placeholder="github.com/yourname" className={fieldBox} />
+        </div>
+        <div className="space-y-2">
+          <label className={fieldLabel}>LinkedIn</label>
+          <input value={linkedin} onChange={(e) => setLinkedin(e.target.value)} placeholder="linkedin.com/in/yourname" className={fieldBox} />
+        </div>
+        <div className="space-y-2">
+          <label className={fieldLabel}>GPA / CGPA <span className="font-normal text-faint">(optional, out of 10)</span></label>
+          <input type="number" min={0} max={10} step="0.01" value={gpa} onChange={(e) => setGpa(e.target.value)} className={fieldBox} />
+        </div>
+      </div>
+
+      {error ? <p className="rounded-lg border border-danger/25 bg-danger/10 px-3 py-2 text-[12.5px] text-danger">{error}</p> : null}
+      {saved ? <p className="text-[12.5px] text-teal">Saved.</p> : null}
+
+      <button
+        type="submit"
+        disabled={pending}
+        className="rounded-lg bg-cyan px-5 py-2 text-[13.5px] font-semibold text-on-accent transition-transform active:scale-95 disabled:opacity-60"
+      >
+        {pending ? "Saving…" : "Save changes"}
+      </button>
+    </form>
   );
 }
 
@@ -89,20 +229,8 @@ export function SettingsView({ data }: { data: SettingsData }) {
                   </div>
                 </div>
               </div>
-              <Link
-                href="/onboarding"
-                className="rounded-lg bg-cyan px-5 py-2 text-[13.5px] font-semibold text-on-accent transition-transform active:scale-95"
-              >
-                Edit Profile
-              </Link>
             </div>
-            <div className="mt-10 grid grid-cols-1 gap-8 border-t border-line pt-8 md:grid-cols-2">
-              <Field label="Full Name" value={data.name} />
-              <Field label="Email" value={data.email} />
-              <Field label="Department" value={data.department ?? "—"} />
-              <Field label="Semester" value={data.semester ? `Semester ${data.semester}` : "—"} />
-              <Field label="Career Goal" value={data.careerGoal ?? "—"} />
-            </div>
+            <EditProfileForm data={data} />
           </div>
         )}
 
