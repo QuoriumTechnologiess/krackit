@@ -4,6 +4,7 @@ import { streamAssistant, type AssistantMessage, type AssistantFocusProject } fr
 import { getOrCreateUser } from "@/lib/user";
 import { getThread, appendTurn } from "@/lib/assistant/thread";
 import { rateLimit, friendlyError, RateLimitError } from "@/lib/reliability";
+import { assertWithinCostBudget } from "@/lib/entitlements";
 import type { ProjectContent } from "@/lib/projects/generate";
 
 const PLAN_LABEL: Record<string, string> = { FREE: "Free", PRO: "Pro", PREMIUM: "Premium" };
@@ -35,7 +36,8 @@ export async function POST(req: Request) {
 
   // Anti-drain: cap assistant messages per user per minute.
   try {
-    rateLimit(user.id, "assistant", 30);
+    await rateLimit(user.id, "assistant", 30);
+    await assertWithinCostBudget(user.id);
   } catch (e) {
     const retryAfter = e instanceof RateLimitError ? Math.ceil(e.retryAfterMs / 1000) : 30;
     return NextResponse.json({ error: friendlyError(e) }, { status: 429, headers: { "Retry-After": String(retryAfter) } });

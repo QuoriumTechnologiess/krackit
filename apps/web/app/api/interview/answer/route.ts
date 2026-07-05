@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getOrCreateUser } from "@/lib/user";
 import { submitAnswer } from "@/lib/interview/generate";
 import { rateLimit, friendlyError, RateLimitError } from "@/lib/reliability";
+import { assertWithinCostBudget } from "@/lib/entitlements";
 
 /**
  * JSON answer endpoint for the LIVE voice interview (Stage 2). Same `submitAnswer` the typed flow
@@ -13,7 +14,8 @@ export async function POST(req: Request) {
   if (!user) return NextResponse.json({ error: "Sign in to continue." }, { status: 401 });
 
   try {
-    rateLimit(user.id, "interview-answer", 80);
+    await rateLimit(user.id, "interview-answer", 80);
+    await assertWithinCostBudget(user.id);
   } catch (e) {
     const retryAfter = e instanceof RateLimitError ? Math.ceil(e.retryAfterMs / 1000) : 30;
     return NextResponse.json({ error: friendlyError(e) }, { status: 429, headers: { "Retry-After": String(retryAfter) } });

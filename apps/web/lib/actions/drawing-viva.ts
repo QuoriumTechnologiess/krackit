@@ -23,7 +23,7 @@ export async function generateDrawingVivaAction(
   if (!hasBranchFeature(user.department, "drawing-viva")) {
     return { error: "This tool isn't available for your branch." };
   }
-  try { rateLimit(user.id, "drawing-viva"); } catch (e) { return { error: friendlyError(e) }; }
+  try { await rateLimit(user.id, "drawing-viva"); } catch (e) { return { error: friendlyError(e) }; }
 
   const instructions = String(formData.get("instructions") ?? "").trim() || undefined;
   const file = formData.get("image");
@@ -62,7 +62,7 @@ export async function regenerateDrawingVivaAction(formData: FormData): Promise<v
   const docId = String(formData.get("docId") ?? "");
   if (!user || !docId) return;
   try {
-    rateLimit(user.id, "drawing-viva-regen", 10);
+    await rateLimit(user.id, "drawing-viva-regen", 10);
     await regenerateDrawingViva(user.id, docId);
   } catch {
     /* busy / rate-limited / surfaced on the page */

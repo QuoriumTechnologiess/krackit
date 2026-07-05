@@ -4,6 +4,25 @@ import { prisma } from "@studentos/db";
 /** Cloudflare R2 storage price (no egress fee) — used only for a rough cost ESTIMATE, not billing. */
 const R2_USD_PER_GB_MONTH = 0.015;
 
+const COST_CAP_SETTING_KEY = "MAX_MONTHLY_AI_COST_CENTS";
+const DEFAULT_MAX_MONTHLY_AI_COST_CENTS = 300; // $3.00/user/month — mirrors apps/web/lib/entitlements.ts
+
+/** Admin-configurable per-user monthly AI $ cap (enforced in apps/web via assertWithinCostBudget). */
+export async function getMaxMonthlyAiCostCents(): Promise<number> {
+  const row = await prisma.platformSetting.findUnique({ where: { key: COST_CAP_SETTING_KEY } });
+  const n = row ? Number(row.value) : NaN;
+  return Number.isFinite(n) && n >= 0 ? n : DEFAULT_MAX_MONTHLY_AI_COST_CENTS;
+}
+
+export async function setMaxMonthlyAiCostCents(cents: number): Promise<void> {
+  const value = String(Math.max(0, Math.round(cents)));
+  await prisma.platformSetting.upsert({
+    where: { key: COST_CAP_SETTING_KEY },
+    create: { key: COST_CAP_SETTING_KEY, value },
+    update: { value },
+  });
+}
+
 export type GatewayCredits = { balance: number; totalUsed: number } | { error: string };
 
 /** Live balance from the Vercel AI Gateway — the authoritative source for total platform AI spend. */

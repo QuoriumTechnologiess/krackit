@@ -30,7 +30,7 @@ export async function generateReportAction(
   const user = await getOrCreateUser();
   if (!user) return { error: "You must be signed in." };
   if (!user.onboardedAt) redirect("/onboarding");
-  try { rateLimit(user.id, "report"); } catch (e) { return { error: friendlyError(e) }; }
+  try { await rateLimit(user.id, "report"); } catch (e) { return { error: friendlyError(e) }; }
 
   const title = String(formData.get("title") ?? "").trim();
   const reportType = String(formData.get("reportType") ?? "").trim();

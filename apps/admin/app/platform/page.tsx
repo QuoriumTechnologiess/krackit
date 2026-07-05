@@ -2,9 +2,10 @@ import { prisma } from "@studentos/db";
 import { requireAdmin } from "@/lib/admin";
 import { NotAuthorized } from "@/components/not-authorized";
 import { AdminShell } from "@/components/shell";
-import { getPlatformCostSummary } from "@/lib/platform-cost";
+import { getPlatformCostSummary, getMaxMonthlyAiCostCents } from "@/lib/platform-cost";
 import { getMaxConcurrentSessions } from "@/lib/sessions";
 import { SessionLimitControl } from "./session-limit-control";
+import { CostCapControl } from "./cost-cap-control";
 
 export const metadata = { title: "Platform — Admin" };
 
@@ -16,11 +17,12 @@ export default async function PlatformPage() {
   const guard = await requireAdmin();
   if (!guard.ok) return <NotAuthorized reason={guard.reason} />;
 
-  const [summary, totalUsers, activeSubs, maxConcurrentSessions] = await Promise.all([
+  const [summary, totalUsers, activeSubs, maxConcurrentSessions, maxMonthlyAiCostCents] = await Promise.all([
     getPlatformCostSummary(),
     prisma.user.count(),
     prisma.subscription.count({ where: { status: "ACTIVE" } }),
     getMaxConcurrentSessions(),
+    getMaxMonthlyAiCostCents(),
   ]);
 
   const gatewayOk = !("error" in summary.gateway);
@@ -84,8 +86,9 @@ export default async function PlatformPage() {
         </div>
       </div>
 
-      <div className="mt-6">
+      <div className="mt-6 grid gap-4 sm:grid-cols-2">
         <SessionLimitControl initial={maxConcurrentSessions} />
+        <CostCapControl initialCents={maxMonthlyAiCostCents} />
       </div>
     </AdminShell>
   );

@@ -32,6 +32,55 @@ function periodStart(): Date {
   return new Date(now.getFullYear(), now.getMonth(), 1);
 }
 
+const COST_CAP_SETTING_KEY = "MAX_MONTHLY_AI_COST_CENTS";
+/** Safety-net default while feature quotas above are unlimited — real $ backstop against a single
+ *  account looping paid AI calls. Admin-adjustable (see /platform in apps/admin) without a deploy. */
+const DEFAULT_MAX_MONTHLY_AI_COST_CENTS = 300; // $3.00/user/month
+
+export class CostBudgetExceededError extends Error {
+  constructor(public readonly capCents: number) {
+    super(
+      `You've reached this month's AI usage limit ($${(capCents / 100).toFixed(2)}). It resets on the 1st — reach out if you need more.`,
+    );
+    this.name = "CostBudgetExceededError";
+  }
+}
+
+export async function getMaxMonthlyAiCostCents(): Promise<number> {
+  const row = await prisma.platformSetting.findUnique({ where: { key: COST_CAP_SETTING_KEY } });
+  const n = row ? Number(row.value) : NaN;
+  return Number.isFinite(n) && n >= 0 ? n : DEFAULT_MAX_MONTHLY_AI_COST_CENTS;
+}
+
+export async function setMaxMonthlyAiCostCents(cents: number): Promise<void> {
+  const value = String(Math.max(0, Math.round(cents)));
+  await prisma.platformSetting.upsert({
+    where: { key: COST_CAP_SETTING_KEY },
+    create: { key: COST_CAP_SETTING_KEY, value },
+    update: { value },
+  });
+}
+
+/** Sum of this user's tracked AI spend (GenerationJob.costCents) so far this calendar month. */
+export async function aiCostCentsThisPeriod(userId: string): Promise<number> {
+  const agg = await prisma.generationJob.aggregate({
+    _sum: { costCents: true },
+    where: { document: { ownerId: userId }, createdAt: { gte: periodStart() } },
+  });
+  return agg._sum.costCents ?? 0;
+}
+
+/**
+ * Hard $ backstop, independent of the per-feature quotas below (which are currently unlimited).
+ * Throws `CostBudgetExceededError` once this user's tracked AI spend this month is at/over the
+ * admin-configured cap. Call at the ENTRY of every AI-cost action — even ones whose own feature
+ * quota is unlimited — so no single account can run up an unbounded Gateway bill.
+ */
+export async function assertWithinCostBudget(userId: string): Promise<void> {
+  const [cap, used] = await Promise.all([getMaxMonthlyAiCostCents(), aiCostCentsThisPeriod(userId)]);
+  if (used >= cap) throw new CostBudgetExceededError(cap);
+}
+
 export function quotaFor(plan: Plan, kind: UsageKind): number | null {
   return QUOTAS[plan][kind];
 }
@@ -42,8 +91,10 @@ export function usageThisPeriod(userId: string, kind: UsageKind): Promise<number
   });
 }
 
-/** Throws QuotaExceededError if the user has no remaining quota for `kind`. */
+/** Throws QuotaExceededError if the user has no remaining quota for `kind`, or
+ *  CostBudgetExceededError if they've hit the $ backstop regardless of feature quota. */
 export async function assertWithinQuota(user: User, kind: UsageKind): Promise<void> {
+  await assertWithinCostBudget(user.id);
   const limit = quotaFor(user.plan, kind);
   if (limit === null) return; // unlimited
   const used = await usageThisPeriod(user.id, kind);

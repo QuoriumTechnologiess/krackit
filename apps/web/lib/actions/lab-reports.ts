@@ -19,7 +19,7 @@ export async function generateLabReportAction(
   const user = await getOrCreateUser();
   if (!user) return { error: "You must be signed in." };
   if (!user.onboardedAt) redirect("/onboarding");
-  try { rateLimit(user.id, "lab-report"); } catch (e) { return { error: friendlyError(e) }; }
+  try { await rateLimit(user.id, "lab-report"); } catch (e) { return { error: friendlyError(e) }; }
 
   const readingsText = String(formData.get("readingsText") ?? "").trim() || undefined;
   const instructions = String(formData.get("instructions") ?? "").trim() || undefined;
@@ -67,7 +67,7 @@ export async function askLabReportAction(formData: FormData): Promise<void> {
   const message = String(formData.get("message") ?? "");
   if (!user || !docId) return;
   try {
-    rateLimit(user.id, "lab-report-tutor", 30);
+    await rateLimit(user.id, "lab-report-tutor", 30);
     await addLabReportTurn(user.id, docId, message);
   } catch {
     /* busy / rate-limited / surfaced on the page */

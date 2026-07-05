@@ -17,6 +17,7 @@ import { getOrCreateUser } from "@/lib/user";
 import { finalizeProject, generateProjectBundle, generateProjectPlan, getProject, getOrGeneratePregeneratedIdeas } from "@/lib/projects/generate";
 import { codingEnabledFor } from "@/lib/capabilities";
 import { rateLimit, friendlyError } from "@/lib/reliability";
+import { assertWithinCostBudget } from "@/lib/entitlements";
 
 export type IdeasFormState = {
   error?: string;
@@ -36,7 +37,7 @@ export async function suggestIdeasAction(
   const user = await getOrCreateUser();
   if (!user) return { error: "You must be signed in." };
   if (!user.onboardedAt) redirect("/onboarding");
-  try { rateLimit(user.id, "project-ideas"); } catch (e) { return { error: friendlyError(e) }; }
+  try { await rateLimit(user.id, "project-ideas"); await assertWithinCostBudget(user.id); } catch (e) { return { error: friendlyError(e) }; }
 
   const interests = String(formData.get("interests") ?? "").trim() || undefined;
   const difficulty = difficultyOf(formData.get("difficulty"));
@@ -106,6 +107,12 @@ export async function generateBundleAction(formData: FormData): Promise<void> {
   const user = await getOrCreateUser();
   const docId = String(formData.get("docId") ?? "");
   if (!user || !docId) return;
+  try {
+    await rateLimit(user.id, "project-bundle", 5);
+    await assertWithinCostBudget(user.id);
+  } catch {
+    return;
+  }
   await generateProjectBundle(user.id, docId);
   redirect(`/projects/${docId}`);
 }
@@ -115,7 +122,8 @@ export async function refreshPregeneratedIdeasAction(): Promise<void> {
   const user = await getOrCreateUser();
   if (!user) return;
   try {
-    rateLimit(user.id, "project-pregenerated-refresh", 5);
+    await rateLimit(user.id, "project-pregenerated-refresh", 5);
+    await assertWithinCostBudget(user.id);
   } catch {
     redirect("/projects");
   }
@@ -129,7 +137,8 @@ export async function generatePlanAction(formData: FormData): Promise<void> {
   const docId = String(formData.get("docId") ?? "");
   if (!user || !docId) return;
   try {
-    rateLimit(user.id, "project-plan");
+    await rateLimit(user.id, "project-plan");
+    await assertWithinCostBudget(user.id);
   } catch {
     return;
   }
@@ -155,7 +164,8 @@ export async function reviewProjectCodeAction(
   if (!docId || !code) return { error: "Paste some code first." };
 
   try {
-    rateLimit(user.id, "project-code-review");
+    await rateLimit(user.id, "project-code-review");
+    await assertWithinCostBudget(user.id);
   } catch (e) {
     return { error: friendlyError(e) };
   }

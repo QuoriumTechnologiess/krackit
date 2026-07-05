@@ -31,7 +31,7 @@ export async function generatePptAction(
 ): Promise<PptFormState> {
   const user = await getOrCreateUser();
   if (!user) return { error: "You must be signed in." };
-  try { rateLimit(user.id, "ppt"); } catch (e) { return { error: friendlyError(e) }; }
+  try { await rateLimit(user.id, "ppt"); } catch (e) { return { error: friendlyError(e) }; }
   if (!user.onboardedAt) redirect("/onboarding");
 
   const title = String(formData.get("title") ?? "").trim();
@@ -150,7 +150,7 @@ export type SaveDeckState = { ok?: boolean; error?: string };
 export async function savePptDeckAction(docId: string, rawContent: unknown): Promise<SaveDeckState> {
   const user = await getOrCreateUser();
   if (!user) return { error: "You must be signed in." };
-  try { rateLimit(user.id, "ppt"); } catch (e) { return { error: friendlyError(e) }; }
+  try { await rateLimit(user.id, "ppt"); } catch (e) { return { error: friendlyError(e) }; }
 
   const doc = await prisma.document.findFirst({
     where: { id: docId, ownerId: user.id, type: "PPT" },
@@ -190,7 +190,7 @@ export type TemplateDeckEdit = {
 export async function saveTemplateDeckAction(docId: string, edit: TemplateDeckEdit): Promise<SaveDeckState> {
   const user = await getOrCreateUser();
   if (!user) return { error: "You must be signed in." };
-  try { rateLimit(user.id, "ppt"); } catch (e) { return { error: friendlyError(e) }; }
+  try { await rateLimit(user.id, "ppt"); } catch (e) { return { error: friendlyError(e) }; }
 
   const doc = await prisma.document.findFirst({
     where: { id: docId, ownerId: user.id, type: "PPT" },
@@ -268,7 +268,7 @@ export async function regenerateSlideImageAction(
 ): Promise<SaveDeckState> {
   const user = await getOrCreateUser();
   if (!user) return { error: "You must be signed in." };
-  try { rateLimit(user.id, "ppt"); } catch (e) { return { error: friendlyError(e) }; }
+  try { await rateLimit(user.id, "ppt"); } catch (e) { return { error: friendlyError(e) }; }
 
   const doc = await prisma.document.findFirst({ where: { id: docId, ownerId: user.id, type: "PPT" } });
   if (!doc) return { error: "Presentation not found." };
@@ -333,7 +333,7 @@ export async function cropSlideImageAction(
 ): Promise<SaveDeckState> {
   const user = await getOrCreateUser();
   if (!user) return { error: "You must be signed in." };
-  try { rateLimit(user.id, "ppt"); } catch (e) { return { error: friendlyError(e) }; }
+  try { await rateLimit(user.id, "ppt"); } catch (e) { return { error: friendlyError(e) }; }
 
   const doc = await prisma.document.findFirst({ where: { id: docId, ownerId: user.id, type: "PPT" } });
   if (!doc) return { error: "Presentation not found." };

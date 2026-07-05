@@ -23,7 +23,7 @@ export async function generateBoqAction(
   if (!hasBranchFeature(user.department, "boq-estimator")) {
     return { error: "This tool isn't available for your branch." };
   }
-  try { rateLimit(user.id, "boq-estimator"); } catch (e) { return { error: friendlyError(e) }; }
+  try { await rateLimit(user.id, "boq-estimator"); } catch (e) { return { error: friendlyError(e) }; }
 
   const dimensionsText = String(formData.get("dimensionsText") ?? "").trim() || undefined;
   const instructions = String(formData.get("instructions") ?? "").trim() || undefined;
@@ -69,7 +69,7 @@ export async function askBoqAction(formData: FormData): Promise<void> {
   const docId = String(formData.get("docId") ?? "");
   if (!user || !docId) return;
   try {
-    rateLimit(user.id, "boq-estimator-tutor", 30);
+    await rateLimit(user.id, "boq-estimator-tutor", 30);
     await addBoqTurn(user.id, docId, String(formData.get("message") ?? ""));
   } catch {
     /* busy / rate-limited / surfaced on the page */

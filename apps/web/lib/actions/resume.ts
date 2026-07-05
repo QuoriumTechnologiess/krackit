@@ -9,6 +9,7 @@ import { getOrCreateUser } from "@/lib/user";
 import { createResumeDoc, runResumeGeneration, setResumeDensity, rescoreResume, updateResume, importResume } from "@/lib/resume/generate";
 import { getResumeOptimizations, applyResumeOptimization, claimKeywords, type ResumeEditPayload, type ResumeOptimizationsResult } from "@/lib/resume/optimize";
 import { rateLimit, friendlyError } from "@/lib/reliability";
+import { assertWithinCostBudget } from "@/lib/entitlements";
 
 export type ResumeFormState = {
   error?: string;
@@ -23,7 +24,7 @@ export async function generateResumeAction(
   const user = await getOrCreateUser();
   if (!user) return { error: "You must be signed in." };
   if (!user.onboardedAt) redirect("/onboarding");
-  try { rateLimit(user.id, "resume"); } catch (e) { return { error: friendlyError(e) }; }
+  try { await rateLimit(user.id, "resume"); await assertWithinCostBudget(user.id); } catch (e) { return { error: friendlyError(e) }; }
 
   const targetRole = String(formData.get("targetRole") ?? "").trim() || undefined;
   let rawNotes = String(formData.get("rawNotes") ?? "").trim() || undefined;

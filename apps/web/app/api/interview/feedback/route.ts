@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getOrCreateUser } from "@/lib/user";
 import { finalizeFromTranscript, type VapiTurn } from "@/lib/interview/generate";
 import { rateLimit, friendlyError, RateLimitError } from "@/lib/reliability";
+import { assertWithinCostBudget } from "@/lib/entitlements";
 
 /**
  * Finalizes the LIVE VAPI interview: the browser sends the transcript it captured during the call,
@@ -13,7 +14,8 @@ export async function POST(req: Request) {
   if (!user) return NextResponse.json({ error: "Sign in to continue." }, { status: 401 });
 
   try {
-    rateLimit(user.id, "interview-feedback", 10);
+    await rateLimit(user.id, "interview-feedback", 10);
+    await assertWithinCostBudget(user.id);
   } catch (e) {
     const retryAfter = e instanceof RateLimitError ? Math.ceil(e.retryAfterMs / 1000) : 30;
     return NextResponse.json({ error: friendlyError(e) }, { status: 429, headers: { "Retry-After": String(retryAfter) } });

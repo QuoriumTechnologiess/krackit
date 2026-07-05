@@ -2,10 +2,20 @@ import { NextResponse } from "next/server";
 import { interviewHint, type InterviewRound } from "@studentos/ai";
 import { getOrCreateUser } from "@/lib/user";
 import { getInterview } from "@/lib/interview/generate";
+import { rateLimit, friendlyError, RateLimitError } from "@/lib/reliability";
+import { assertWithinCostBudget } from "@/lib/entitlements";
 
 export async function POST(req: Request) {
   const user = await getOrCreateUser();
   if (!user) return NextResponse.json({ error: "Sign in first." }, { status: 401 });
+
+  try {
+    await rateLimit(user.id, "interview-hint", 10);
+    await assertWithinCostBudget(user.id);
+  } catch (e) {
+    const retryAfter = e instanceof RateLimitError ? Math.ceil(e.retryAfterMs / 1000) : 30;
+    return NextResponse.json({ error: friendlyError(e) }, { status: 429, headers: { "Retry-After": String(retryAfter) } });
+  }
 
   let body: unknown;
   try {

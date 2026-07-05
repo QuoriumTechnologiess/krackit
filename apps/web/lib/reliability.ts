@@ -1,11 +1,15 @@
 /**
  * App-side reliability: turn any failure into a calm, user-safe message (never a raw stack or
- * provider error), and an in-memory per-user rate limiter so nobody can loop our paid endpoints.
- * (Server-side state — only ever called from server actions / route handlers.)
+ * provider error), and a per-user rate limiter so nobody can loop our paid endpoints — including
+ * a user who copies our own frontend's request and replays it in a script.
  *
- * NOTE: the limiter is per-process (in-memory) — fine for now, but move to a shared store
- * (Neon/Upstash) before a real public launch, since serverless runs many instances.
+ * The limiter is backed by Upstash Redis (shared across every instance — required once you run
+ * more than one process, since an in-memory counter is trivially bypassed by hitting a different
+ * instance). If UPSTASH_REDIS_REST_URL/TOKEN aren't set (local dev with no Upstash account yet),
+ * it falls back to an in-memory limiter — same pattern as AI_DRIVER=stub elsewhere in this repo.
  */
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
 
 export class RateLimitError extends Error {
   constructor(public readonly retryAfterMs: number) {
@@ -14,14 +18,38 @@ export class RateLimitError extends Error {
   }
 }
 
+const redis =
+  process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
+    ? new Redis({ url: process.env.UPSTASH_REDIS_REST_URL, token: process.env.UPSTASH_REDIS_REST_TOKEN })
+    : null;
+
+if (!redis) {
+  console.warn(
+    "[reliability] UPSTASH_REDIS_REST_URL/TOKEN not set — rate limiting is falling back to an " +
+      "in-memory, per-process limiter. Fine for local dev; NOT safe once more than one instance runs.",
+  );
+}
+
+// One Ratelimit instance per (limit, windowMs) pair, cached so we don't recreate it on every call.
+const limiters = new Map<string, Ratelimit>();
+function limiterFor(limit: number, windowMs: number): Ratelimit {
+  const key = `${limit}:${windowMs}`;
+  let rl = limiters.get(key);
+  if (!rl) {
+    rl = new Ratelimit({
+      redis: redis!,
+      limiter: Ratelimit.slidingWindow(limit, `${windowMs} ms`),
+      prefix: "studentos:ratelimit",
+    });
+    limiters.set(key, rl);
+  }
+  return rl;
+}
+
+// In-memory fallback — only used when Redis isn't configured (see warning above).
 type Bucket = { count: number; resetAt: number };
 const buckets = new Map<string, Bucket>();
-
-/**
- * Fixed-window limiter. Throws `RateLimitError` when a user exceeds `limit` calls to `action`
- * within `windowMs`. Call at the ENTRY of a user-initiated action — never around internal retries.
- */
-export function rateLimit(userId: string, action: string, limit = 20, windowMs = 60_000): void {
+function rateLimitInMemory(userId: string, action: string, limit: number, windowMs: number): void {
   const key = `${userId}:${action}`;
   const now = Date.now();
   const b = buckets.get(key);
@@ -31,6 +59,18 @@ export function rateLimit(userId: string, action: string, limit = 20, windowMs =
   }
   if (b.count >= limit) throw new RateLimitError(b.resetAt - now);
   b.count++;
+}
+
+/**
+ * Sliding-window limiter, shared across every app instance via Redis. Throws `RateLimitError`
+ * when a user exceeds `limit` calls to `action` within `windowMs`. Call at the ENTRY of a
+ * user-initiated action — never around internal retries.
+ */
+export async function rateLimit(userId: string, action: string, limit = 20, windowMs = 60_000): Promise<void> {
+  if (!redis) return rateLimitInMemory(userId, action, limit, windowMs);
+
+  const { success, reset } = await limiterFor(limit, windowMs).limit(`${userId}:${action}`);
+  if (!success) throw new RateLimitError(Math.max(0, reset - Date.now()));
 }
 
 // Errors that would scare/confuse a user (provider/infra/parse internals) → genericize.

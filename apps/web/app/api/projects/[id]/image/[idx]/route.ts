@@ -2,6 +2,7 @@ import { prisma } from "@studentos/db";
 import { getObjectBuffer } from "@studentos/storage";
 import { getOrCreateUser } from "@/lib/user";
 import type { ProjectContent } from "@/lib/projects/generate";
+import { rateLimit, RateLimitError } from "@/lib/reliability";
 
 /** Serve a generated project build-plan image (owner-scoped). The key lives on content.breakdown.images. */
 export async function GET(
@@ -11,6 +12,15 @@ export async function GET(
   const { id, idx } = await params;
   const user = await getOrCreateUser();
   if (!user) return new Response("Unauthorized", { status: 401 });
+
+  // Generous limit — a normal page load fires one request per image, not a per-user action.
+  // This only guards against a script looping the endpoint to run up R2 bandwidth.
+  try {
+    await rateLimit(user.id, "project-image", 120);
+  } catch (e) {
+    const retryAfter = e instanceof RateLimitError ? Math.ceil(e.retryAfterMs / 1000) : 30;
+    return new Response("Too many requests", { status: 429, headers: { "Retry-After": String(retryAfter) } });
+  }
 
   const imgIndex = parseInt(idx, 10);
   if (!Number.isInteger(imgIndex) || imgIndex < 0) return new Response("Bad request", { status: 400 });

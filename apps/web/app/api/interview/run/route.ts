@@ -23,7 +23,7 @@ export async function POST(req: Request) {
   if (!user) return NextResponse.json({ error: "Sign in to run code." }, { status: 401 });
 
   try {
-    rateLimit(user.id, "interview-run", 30);
+    await rateLimit(user.id, "interview-run", 30);
   } catch (e) {
     const retryAfter = e instanceof RateLimitError ? Math.ceil(e.retryAfterMs / 1000) : 30;
     return NextResponse.json({ error: friendlyError(e) }, { status: 429, headers: { "Retry-After": String(retryAfter) } });

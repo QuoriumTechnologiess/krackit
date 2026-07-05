@@ -8,7 +8,7 @@ export async function POST(req: Request) {
   if (!user) return NextResponse.json({ error: "Sign in to continue." }, { status: 401 });
 
   try {
-    rateLimit(user.id, "interview-room-end", 10);
+    await rateLimit(user.id, "interview-room-end", 10);
   } catch (e) {
     const retryAfter = e instanceof RateLimitError ? Math.ceil(e.retryAfterMs / 1000) : 30;
     return NextResponse.json({ error: friendlyError(e) }, { status: 429, headers: { "Retry-After": String(retryAfter) } });

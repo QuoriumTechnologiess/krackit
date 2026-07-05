@@ -28,7 +28,7 @@ export async function solveBranchAction(
     return { error: "This tool isn't available for your branch." };
   }
 
-  try { rateLimit(user.id, `branch-solver:${feature}`); } catch (e) { return { error: friendlyError(e) }; }
+  try { await rateLimit(user.id, `branch-solver:${feature}`); } catch (e) { return { error: friendlyError(e) }; }
 
   const questionText = String(formData.get("questionText") ?? "").trim() || undefined;
   const instructions = String(formData.get("instructions") ?? "").trim() || undefined;
@@ -76,7 +76,7 @@ export async function askBranchSolverAction(formData: FormData): Promise<void> {
   const feature = String(formData.get("feature") ?? "");
   if (!user || !docId) return;
   try {
-    rateLimit(user.id, `branch-solver-tutor:${feature}`, 30);
+    await rateLimit(user.id, `branch-solver-tutor:${feature}`, 30);
     await addBranchSolverTurn(user.id, docId, String(formData.get("message") ?? ""));
   } catch {
     /* busy / rate-limited / surfaced on the page */

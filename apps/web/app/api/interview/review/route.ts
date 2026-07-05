@@ -3,6 +3,7 @@ import { prisma } from "@studentos/db";
 import { reviewInterviewCode, withAiRetry } from "@studentos/ai";
 import { getOrCreateUser } from "@/lib/user";
 import { rateLimit, friendlyError, RateLimitError } from "@/lib/reliability";
+import { assertWithinCostBudget } from "@/lib/entitlements";
 
 /**
  * STATIC review of a candidate's code during a live interview — checks syntax + approach WITHOUT
@@ -14,7 +15,8 @@ export async function POST(req: Request) {
   if (!user) return NextResponse.json({ error: "Sign in to submit code." }, { status: 401 });
 
   try {
-    rateLimit(user.id, "interview-review", 30);
+    await rateLimit(user.id, "interview-review", 30);
+    await assertWithinCostBudget(user.id);
   } catch (e) {
     const retryAfter = e instanceof RateLimitError ? Math.ceil(e.retryAfterMs / 1000) : 30;
     return NextResponse.json({ error: friendlyError(e) }, { status: 429, headers: { "Retry-After": String(retryAfter) } });
