@@ -54,7 +54,7 @@ export default async function VaultPage({ searchParams }: { searchParams: Promis
   const typeFilter = FILTERS.some((f) => f.value && f.value === type) ? (type as DocumentType) : undefined;
   const query = q?.trim();
 
-  const [docs, reportCount, pptCount, assignmentCount, totalCount, latest] = await Promise.all([
+  const [docs, reportCount, pptCount, assignmentCount, latest] = await Promise.all([
     prisma.document.findMany({
       where: { ownerId: user.id, ...(typeFilter ? { type: typeFilter } : {}), ...(query ? { title: { contains: query, mode: "insensitive" } } : {}) },
       orderBy: { updatedAt: "desc" },
@@ -63,7 +63,6 @@ export default async function VaultPage({ searchParams }: { searchParams: Promis
     prisma.document.count({ where: { ownerId: user.id, type: "REPORT" } }),
     prisma.document.count({ where: { ownerId: user.id, type: "PPT" } }),
     prisma.document.count({ where: { ownerId: user.id, type: "ASSIGNMENT" } }),
-    prisma.document.count({ where: { ownerId: user.id } }),
     prisma.document.findFirst({ where: { ownerId: user.id }, orderBy: { updatedAt: "desc" }, select: { updatedAt: true } }),
   ]);
 

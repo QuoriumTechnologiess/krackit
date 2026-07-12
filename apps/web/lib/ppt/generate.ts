@@ -24,7 +24,7 @@ import {
 } from "@studentos/ai";
 import { assertWithinQuota, recordUsage } from "@/lib/entitlements";
 import { getOrCreateCurrentWorkspace } from "@/lib/workspace";
-import { setJobStage, addJobCostCents } from "@/lib/jobs";
+import { setJobStage } from "@/lib/jobs";
 
 const PPTX_MIME =
   "application/vnd.openxmlformats-officedocument.presentationml.presentation";

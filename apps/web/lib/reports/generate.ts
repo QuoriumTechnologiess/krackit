@@ -582,6 +582,9 @@ export async function removeReportFigure(userId: string, docId: string, sectionI
   if (!doc?.content) return { ok: false };
   const content = backfillReportContent(doc.content.data, doc.title, doc.owner);
   if (content.sections[sectionIndex]) {
+    // Destructure-to-omit: strip these 4 fields, keep the rest — the discarded bindings are
+    // intentional, not dead code.
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { image: _i, caption: _c, imagePrompt: _p, imageWidthPct: _w, ...rest } = content.sections[sectionIndex];
     content.sections[sectionIndex] = rest;
   }

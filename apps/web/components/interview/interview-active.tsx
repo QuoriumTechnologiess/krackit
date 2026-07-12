@@ -59,7 +59,7 @@ export function InterviewActive({ docId, view, live, isLast }: { docId: string; 
       {isCoding ? (
         <InterviewCodePanel docId={docId} question={view.question} runnable={view.runnable} isLast={isLast} />
       ) : (
-        <InterviewAnswerPanel docId={docId} question={view.question} isCoding={false} isLast={isLast} />
+        <InterviewAnswerPanel docId={docId} question={view.question} isLast={isLast} />
       )}
     </div>
   );

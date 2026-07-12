@@ -7,7 +7,7 @@ import { SubmitButton } from "@/components/ui/button";
 
 const STUCK_MS = 150_000; // ~2.5 min with no activity → offer a nudge
 
-export function InterviewAnswerPanel({ docId, question, isCoding, isLast }: { docId: string; question: string; isCoding: boolean; isLast: boolean }) {
+export function InterviewAnswerPanel({ docId, question, isLast }: { docId: string; question: string; isLast: boolean }) {
   const [answer, setAnswer] = useState("");
   const [stuck, setStuck] = useState(false);
   const [hint, setHint] = useState<string | null>(null);
