@@ -58,6 +58,9 @@ jobs:
     # Settings → Environments → "production" → Required reviewers → add the owner.
     environment: production
     strategy:
+      # Each app is an independent deploy target — one failing (e.g. a migration hiccup on
+      # `web`) must never cancel the other two mid-deploy.
+      fail-fast: false
       matrix:
         include:
           - app: web
@@ -78,12 +81,16 @@ jobs:
 
       - uses: google-github-actions/setup-gcloud@v2
 
+      # Tries the dedicated `run-migrations` Cloud Run Job first (doesn't exist yet — a
+      # nice-to-have documented in CICD_SETUP.md, not a blocker). This runner has no Node/pnpm
+      # set up, so there's no local fallback here; run `pnpm --filter @studentos/db run
+      # migrate:deploy` manually against production when the schema changes, until the job
+      # exists. Never blocks the actual app deploy below.
       - name: Run pending Neon migrations (web only, once)
         if: matrix.app == 'web'
+        continue-on-error: true
         run: |
-          gcloud run jobs execute run-migrations \
-            --region ${{ env.GCP_REGION }} \
-            --wait || pnpm --filter @studentos/db run migrate:deploy
+          gcloud run jobs execute run-migrations --region ${{ env.GCP_REGION }} --wait
 
       - name: Deploy ${{ matrix.app }} to production Cloud Run
         run: |
