@@ -28,9 +28,9 @@ export const BRANCH_SOLVER_FEATURES: Record<string, BranchSolverFeature> = {
   },
   "ee-solver": {
     slug: "ee-solver",
-    label: "Electrical Numerical Solver",
-    blurb: "Motors, transformers, protection systems, power systems, circuit theory — type or photograph the question and get a unit-checked, step-by-step solution.",
-    placeholder: "e.g. A 3-phase, 415V, 50Hz induction motor draws 20A at 0.85 lagging PF. Find the input power and kVA…",
+    label: "Electrical Solver & Nameplate Reader",
+    blurb: "Motors, transformers, protection systems, power systems, circuit theory — type or photograph the question (or photograph a motor/transformer nameplate to auto-extract its specs) and get a unit-checked, step-by-step solution.",
+    placeholder: "e.g. A 3-phase, 415V, 50Hz induction motor draws 20A at 0.85 lagging PF. Find the input power and kVA… (or upload a nameplate photo and ask for % slip / turns ratio)",
     backLabel: "Electrical tools",
   },
   "ece-solver": {

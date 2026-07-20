@@ -27,10 +27,10 @@ export function codingEnabledFor(user: { codingEnabled?: boolean | null }): bool
  */
 export const BRANCH_FEATURES: Record<string, string[]> = {
   "Mechanical Engineering": ["mech-solver", "drawing-viva"],
-  "Civil Engineering": ["structural-checker", "boq-estimator"],
-  "Electrical Engineering": ["ee-solver"],
-  "Electronics & Telecommunication": ["ece-solver"],
-  "Chemical Engineering": ["chem-solver"],
+  "Civil Engineering": ["structural-checker", "boq-estimator", "load-diagram-visualizer", "material-test-simulator"],
+  "Electrical Engineering": ["ee-solver", "circuit-builder", "fault-finder"],
+  "Electronics & Telecommunication": ["ece-solver", "digital-logic-sim", "signal-playground", "opamp-trainer"],
+  "Chemical Engineering": ["chem-solver", "reaction-lab", "process-flow-builder", "property-lookup"],
 };
 
 /** All branch-specific feature slugs a department unlocks. Fails open to an empty list. */

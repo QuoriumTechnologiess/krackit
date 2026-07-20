@@ -242,9 +242,71 @@ export const ChipIcon = (p: IconProps) => (
   </Base>
 );
 
+export const WaveformIcon = (p: IconProps) => (
+  <Base {...p}>
+    <path d="M2 12h3l2-7 3 14 3-11 2 4h7" />
+  </Base>
+);
+
+export const OpAmpIcon = (p: IconProps) => (
+  <Base {...p}>
+    <path d="M4 6v12l14-6L4 6z" />
+    <path d="M18 9v6M22 10v1M22 13v1" />
+  </Base>
+);
+
+export const PipelineIcon = (p: IconProps) => (
+  <Base {...p}>
+    <rect x="2" y="10" width="8" height="6" rx="1" />
+    <rect x="14" y="4" width="8" height="6" rx="1" />
+    <rect x="14" y="16" width="8" height="6" rx="1" />
+    <path d="M10 13h2a2 2 0 002-2V7M12 13v6" />
+  </Base>
+);
+
+export const ChartIcon = (p: IconProps) => (
+  <Base {...p}>
+    <path d="M4 20V10M11 20V4M18 20v-7" />
+    <path d="M2 20h20" />
+  </Base>
+);
+
 export const FlaskIcon = (p: IconProps) => (
   <Base {...p}>
     <path d="M9 2v6.5L4 18a2 2 0 001.8 3h12.4a2 2 0 001.8-3l-5-9.5V2" />
     <path d="M8 2h8M6.5 14h11" />
+  </Base>
+);
+
+export const FactoryIcon = (p: IconProps) => (
+  <Base {...p}>
+    <path d="M3 21V11l6 4V11l6 4V8l6 4v9z" />
+    <path d="M3 21h18" />
+  </Base>
+);
+
+/** Beam on two supports with a wavy load-diagram trace above it — Load Diagram Visualizer. */
+export const BeamIcon = (p: IconProps) => (
+  <Base {...p}>
+    <path d="M3 20h18" />
+    <path d="M6 20l-2.5 4M18 20l2.5 4" />
+    <path d="M4 9c2-3 4 3 6 0s4 3 6 0 4 3 4 0" />
+  </Base>
+);
+
+/** Cube between two press platens — Material Test Simulator (slump/compression tests). */
+export const CubeIcon = (p: IconProps) => (
+  <Base {...p}>
+    <path d="M3 6h18M3 18h18" />
+    <rect x="7" y="8" width="10" height="8" rx="1" />
+  </Base>
+);
+
+/** Sidebar collapse/expand toggle — a panel with a divider, arrow flips per direction via CSS. */
+export const PanelToggleIcon = (p: IconProps) => (
+  <Base {...p}>
+    <rect x="3" y="4" width="18" height="16" rx="2" />
+    <path d="M9 4v16" />
+    <path d="M14 9l-2.5 3 2.5 3" />
   </Base>
 );
