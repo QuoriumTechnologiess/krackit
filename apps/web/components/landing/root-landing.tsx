@@ -749,59 +749,68 @@ export function RootLanding() {
             </div>
           </Reveal>
 
-          <div className="flex flex-col gap-6 lg:gap-8">
-            {BRANCHES.map(({ name, Animation, iconWrap, hoverBorder, tag, blurb, tags, labSoon, rgb }, i) => {
-              const imageRight = i % 2 === 1;
-              return (
-                <Reveal key={name} delay={i * 60}>
-                  <Card3D
-                    gradient={`linear-gradient(135deg, rgba(${rgb},0.4), rgba(${rgb},0.08))`}
-                    bgClass="bg-[#0d1b2a]"
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {BRANCHES.map(({ name, Animation, tag, blurb, tags, labSoon, rgb }, i) => (
+              <Reveal key={name} delay={i * 60}>
+                <div
+                  className="group relative overflow-hidden transition-all duration-300 hover:scale-[1.03]"
+                  style={{
+                    borderRadius: "0.5rem 2rem",
+                    boxShadow: "0px 15px 20px -5px rgba(0, 0, 0, 0.5)",
+                  }}
+                >
+                  {/* Image container with animation */}
+                  <div
+                    className="relative grid overflow-hidden"
+                    style={{
+                      height: 270,
+                      borderRadius: "0.5rem 2rem",
+                      background: `linear-gradient(135deg, rgba(${rgb}, 0.1), rgba(${rgb}, 0.3))`,
+                    }}
                   >
-                    <div className={`relative flex flex-col ${imageRight ? "sm:flex-row-reverse" : "sm:flex-row"}`}>
-                      <div
-                        className="flex items-center justify-center p-10 sm:w-[36%]"
-                        style={{ backgroundColor: `rgba(${rgb}, 0.2)` }}
-                      >
-                        <Animation rgb={rgb} />
-                      </div>
-                      <div className="flex-1 p-6 sm:p-8">
-                        <h3 className="font-display text-[20px] font-bold text-white">{name}</h3>
-                        <p className="mt-2 text-[14.5px] leading-relaxed text-gray-300">{blurb}</p>
-                        <div className="mt-4 flex flex-wrap gap-1.5">
-                          {tags.map((t) => (
-                            <span key={t} className={`rounded-full px-3 py-1.5 text-[12px] font-semibold ${tag}`}>
-                              {t}
-                            </span>
-                          ))}
-                        </div>
-                        <p className="mt-4 flex items-start gap-1.5 border-t border-dashed border-white/10 pt-3 text-[13px] leading-relaxed text-gray-400">
-                          <span className="mt-px inline-block shrink-0 rounded-full border border-dashed border-white/15 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-gray-400">
-                            SOON
-                          </span>
-                          Interactive lab: {labSoon}
-                        </p>
-                      </div>
+                    <div className="flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
+                      <Animation rgb={rgb} />
                     </div>
-                  </Card3D>
-                </Reveal>
-              );
-            })}
+                  </div>
 
-            <Reveal delay={BRANCHES.length * 60}>
-              <div className="rounded-2xl border border-dashed border-line-strong bg-transparent p-8 text-center">
-                <span className="inline-block rounded-full border border-line-strong px-2.5 py-1 text-[12px] font-semibold tracking-wide text-faint">
-                  COMING SOON
-                </span>
-                <h3 className="mt-4 font-display text-[18px] font-bold text-ink">Don&apos;t see your branch?</h3>
-                <p className="mx-auto mt-2 max-w-[480px] text-[14px] leading-relaxed text-muted">
-                  Reports, assignments, resumes, and interview prep already work for every branch — a
-                  dedicated numerical solver for yours is next.
-                </p>
-                <p className="mt-3 text-[13px] text-faint">{OTHER_BRANCHES}</p>
-              </div>
-            </Reveal>
+                  {/* Description overlay */}
+                  <div
+                    className="absolute bottom-2 left-2 w-[90%] overflow-hidden text-ellipsis whitespace-nowrap transition-all duration-500 ease-in-out"
+                    style={{
+                      padding: "0.5rem 1em",
+                      borderRadius: "0.5rem 2rem",
+                      backdropFilter: "blur(0.1rem)",
+                      backgroundColor: "rgba(0, 0, 0, 0.4)",
+                    }}
+                  >
+                    <h3 className="text-[15px] font-bold text-white">{name}</h3>
+                    <p className="mt-1 text-[12px] text-gray-300 truncate">{blurb}</p>
+                    <div className="mt-2 flex flex-wrap gap-1">
+                      {tags.map((t) => (
+                        <span key={t} className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${tag}`}>
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </Reveal>
+            ))}
           </div>
+
+          <Reveal delay={BRANCHES.length * 60}>
+            <div className="mt-6 rounded-2xl border border-dashed border-line-strong bg-transparent p-8 text-center">
+              <span className="inline-block rounded-full border border-line-strong px-2.5 py-1 text-[12px] font-semibold tracking-wide text-faint">
+                COMING SOON
+              </span>
+              <h3 className="mt-4 font-display text-[18px] font-bold text-ink">Don&apos;t see your branch?</h3>
+              <p className="mx-auto mt-2 max-w-[480px] text-[14px] leading-relaxed text-muted">
+                Reports, assignments, resumes, and interview prep already work for every branch — a
+                dedicated numerical solver for yours is next.
+              </p>
+              <p className="mt-3 text-[13px] text-faint">{OTHER_BRANCHES}</p>
+            </div>
+          </Reveal>
         </div>
       </section>
 
