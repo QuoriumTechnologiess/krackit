@@ -1,4 +1,4 @@
-import { Logo, LogoMark } from "@/components/logo";
+import { Logo, LogoMark, Krackit } from "@/components/logo";
 import { Reveal } from "@/components/reveal";
 import { ThemeToggle } from "@/components/theme-toggle";
 import {
@@ -38,6 +38,20 @@ import {
   RecruiterDirectMessageAnimation,
   LiveInterviewRecruiterAnimation,
 } from "./recruiter-effects";
+
+function KrackitText({ text }: { text: string }) {
+  const parts = text.split("krackit");
+  return (
+    <>
+      {parts.map((part, i) => (
+        <span key={i}>
+          {part}
+          {i < parts.length - 1 && <Krackit />}
+        </span>
+      ))}
+    </>
+  );
+}
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 const RECRUITER_URL = process.env.NEXT_PUBLIC_RECRUITER_APP_URL ?? "http://localhost:3200";
@@ -454,10 +468,10 @@ function HowItWorks() {
         <div className="mx-auto mb-16 max-w-[600px] text-center">
           <span className="mb-4 inline-block rounded-full border border-cyan/20 bg-cyan/8 px-4 py-1.5 text-[12px] font-semibold tracking-wide text-cyan">HOW IT WORKS</span>
           <h2 className="font-display text-[34px] font-bold leading-[1.12] text-ink sm:text-[42px]">
-            Three steps to a verified career
+            Three steps to a <Krackit />-powered career
           </h2>
           <p className="mt-3 text-[16px] text-muted">
-            From first sign-up to your next opportunity — krackit guides every step with real tools, not empty promises.
+            From first sign-up to your next opportunity — <Krackit /> guides every step with real tools, not empty promises.
           </p>
         </div>
         <div className="grid gap-6 md:grid-cols-3">
@@ -493,21 +507,21 @@ function FAQ() {
         <div className="mb-14 text-center">
           <span className="mb-4 inline-block rounded-full border border-indigo/20 bg-indigo/8 px-4 py-1.5 text-[12px] font-semibold tracking-wide text-indigo">FAQ</span>
           <h2 className="font-display text-[32px] font-bold text-ink sm:text-[38px]">
-            Frequently asked questions
+            <Krackit /> questions, answered
           </h2>
           <p className="mx-auto mt-3 max-w-[520px] text-[16px] text-muted">
-            Everything you need to know about krackit. Still have questions? Reach out to our team.
+            Everything you need to know about <Krackit />. Still have questions? Reach out to our team.
           </p>
         </div>
         <div className="space-y-3">
           {FAQS.map(({ q, a }) => (
             <details key={q} className="group rounded-xl border border-line bg-card transition-colors open:border-cyan/30 hover:border-line-strong">
               <summary className="flex cursor-pointer items-center justify-between px-6 py-5 text-[15px] font-semibold text-ink transition-colors group-open:text-cyan">
-                {q}
+                <KrackitText text={q} />
                 <span className="ml-4 shrink-0 text-[18px] text-faint transition-transform duration-300 group-open:rotate-180 group-open:text-cyan">▾</span>
               </summary>
               <div className="border-t border-line px-6 pb-5 pt-3">
-                <p className="text-[14.5px] leading-relaxed text-muted">{a}</p>
+                <p className="text-[14.5px] leading-relaxed text-muted"><KrackitText text={a} /></p>
               </div>
             </details>
           ))}
@@ -524,7 +538,7 @@ export function RootLanding() {
 
       <header className="fixed inset-x-0 top-0 z-50 border-b border-line bg-base/70 backdrop-blur-xl">
         <div className="mx-auto flex h-[64px] max-w-7xl items-center justify-between px-5">
-          <Logo size={30} />
+          <Logo size={150} />
           <div className="flex items-center gap-4 sm:gap-6">
             <a href={APP_URL} className="hidden text-[14px] font-medium text-soft transition-colors hover:text-ink sm:block">
               Students
@@ -564,20 +578,20 @@ export function RootLanding() {
         <div className="relative w-full">
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-cyan/20 bg-cyan/8 px-4 py-1.5 text-[13px] font-semibold tracking-wide text-cyan">
             <span className="inline-block size-1.5 animate-pulse-ring rounded-full bg-cyan" />
-            The career platform for everyone
+            Your career, engineered by <strong><Krackit /></strong>
           </div>
 
           <h1 className="font-display text-[40px] font-bold leading-[1.08] tracking-tight text-ink sm:text-[54px] lg:text-[62px] xl:text-[70px]">
-            <span className="block">Crack college. Crack interviews.</span>
+            <span className="block">From classroom to career.</span>
             <span className="mt-2 block">
               <span className="bg-gradient-to-r from-cyan via-indigo to-cyan bg-clip-text text-transparent">
-                Crack your career.
+                <strong><Krackit /></strong> bridges the gap.
               </span>
             </span>
           </h1>
 
           <p className="mx-auto mt-5 max-w-[640px] text-[17px] leading-relaxed text-muted sm:text-[18px]">
-            krackit is the AI-powered career platform where engineering students create academic work, professionals upskill with mock interviews and DSA practice, and recruiters hire based on verified evidence — not resumes that anyone can fake.
+            <strong><Krackit /></strong> is the AI-powered career platform <strong>built exclusively for engineering students, working professionals, and recruiters</strong> who believe in proof over promises. Generate branch-specific reports, ace mock interviews, practice DSA with real code execution, and connect with recruiters who value verified skills — all in one place.
           </p>
 
           <div className="mx-auto mt-10 max-w-5xl xl:max-w-6xl">
@@ -596,7 +610,7 @@ export function RootLanding() {
                   <GraduationCapIcon size={20} />
                 </span>
                 <h2 className="font-display text-[22px] font-bold text-ink">I&apos;m a student</h2>
-                <p className="mt-1 text-[14px] text-muted">Create, practice, and get hired.</p>
+                <p className="mt-1 text-[14px] text-muted"><Krackit /> helps you build proof of work before you graduate.</p>
                 <ul className="mt-4 space-y-2">
                   {STUDENT_POINTS.map((p) => (
                     <li key={p} className="flex items-start gap-2 text-[14px] leading-relaxed text-soft">
@@ -622,7 +636,7 @@ export function RootLanding() {
                   <BriefcaseIcon size={20} />
                 </span>
                 <h2 className="font-display text-[22px] font-bold text-ink">I&apos;m a professional</h2>
-                <p className="mt-1 text-[14px] text-muted">Upskill, showcase, and advance.</p>
+                <p className="mt-1 text-[14px] text-muted">Stay sharp. Stay visible. <Krackit /> keeps your edge.</p>
                 <ul className="mt-4 space-y-2">
                   {PROFESSIONAL_POINTS.map((p) => (
                     <li key={p} className="flex items-start gap-2 text-[14px] leading-relaxed text-soft">
@@ -648,7 +662,7 @@ export function RootLanding() {
                   <span className="text-[22px]">💼</span>
                 </span>
                 <h2 className="font-display text-[22px] font-bold text-ink">I&apos;m a recruiter</h2>
-                <p className="mt-1 text-[14px] text-muted">Hire on proof, not promises.</p>
+                <p className="mt-1 text-[14px] text-muted">Find verified talent on <Krackit />. Skip the noise.</p>
                 <ul className="mt-4 space-y-2">
                   {RECRUITER_POINTS.map((p) => (
                     <li key={p} className="flex items-start gap-2 text-[14px] leading-relaxed text-soft">
@@ -674,10 +688,10 @@ export function RootLanding() {
             <div className="mb-14 text-center">
               <span className="mb-4 inline-block rounded-full border border-cyan/20 bg-cyan/8 px-4 py-1.5 text-[12px] font-semibold tracking-wide text-cyan">PLATFORM</span>
               <h2 className="font-display text-[32px] font-bold text-ink sm:text-[38px]">
-                Built for both sides of the table
+                <Krackit /> for students &mdash; <Krackit /> for recruiters
               </h2>
               <p className="mt-3 text-[16px] text-muted">
-                Everything a student needs to build proof of work — everything a recruiter needs to trust it.
+                Everything a student needs to build proof of work. Everything a recruiter needs to trust it.
               </p>
             </div>
           </Reveal>
@@ -743,8 +757,9 @@ export function RootLanding() {
                 Built branch by branch, not one-size-fits-all
               </h2>
               <p className="mx-auto mt-3 max-w-[560px] text-[16px] text-muted">
-                Assignments, reports, resumes, DSA, and interviews work for every branch. On top of
-                that, each department gets tools built specifically for what it actually studies.
+                Each engineering branch gets its own set of <Krackit /> tools — assignments, reports,
+                DSA, and interviews — plus specialized solvers and labs for what that branch
+                actually studies.
               </p>
             </div>
           </Reveal>
@@ -785,7 +800,7 @@ export function RootLanding() {
                     }}
                   >
                     <h3 className="text-[15px] font-bold text-white">{name}</h3>
-                    <p className="mt-1 text-[12px] text-gray-300 truncate">{blurb}</p>
+                    <p className="mt-1 text-[12px] text-gray-300 truncate"><KrackitText text={blurb} /></p>
                     <div className="mt-2 flex flex-wrap gap-1">
                       {tags.map((t) => (
                         <span key={t} className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${tag}`}>
@@ -800,16 +815,42 @@ export function RootLanding() {
           </div>
 
           <Reveal delay={BRANCHES.length * 60}>
-            <div className="mt-6 rounded-2xl border border-dashed border-line-strong bg-transparent p-8 text-center">
-              <span className="inline-block rounded-full border border-line-strong px-2.5 py-1 text-[12px] font-semibold tracking-wide text-faint">
-                COMING SOON
-              </span>
-              <h3 className="mt-4 font-display text-[18px] font-bold text-ink">Don&apos;t see your branch?</h3>
-              <p className="mx-auto mt-2 max-w-[480px] text-[14px] leading-relaxed text-muted">
-                Reports, assignments, resumes, and interview prep already work for every branch — a
-                dedicated numerical solver for yours is next.
-              </p>
-              <p className="mt-3 text-[13px] text-faint">{OTHER_BRANCHES}</p>
+            <div className="group relative mt-6 overflow-hidden rounded-2xl bg-gradient-to-br from-[#0d1b2a] via-[#0f1a24] to-[#0d1b2a] p-[1px]">
+              <div className="absolute -inset-[1px] rounded-2xl opacity-0 transition-opacity duration-700 group-hover:opacity-100"
+                style={{
+                  background: "conic-gradient(from 0deg, #FE7F2D, #F7C131, #006a61, #FE7F2D)",
+                  animation: "borderRotate 4s linear infinite",
+                }}
+              />
+              <div className="relative rounded-2xl bg-gradient-to-br from-[#0d1b2a] to-[#0f1a24] p-10 text-center sm:p-14">
+                <div className="pointer-events-none absolute inset-0 rounded-2xl bg-[radial-gradient(ellipse_at_top,rgba(254,127,45,0.08),transparent_60%)]" />
+
+                <span className="relative inline-block">
+                  <span className="bg-gradient-to-r from-[#FE7F2D] via-[#F7C131] to-[#FE7F2D] bg-clip-text text-[44px] font-black leading-none tracking-[0.2em] text-transparent sm:text-[56px]"
+                    style={{ fontFamily: "'Arial Black', 'Impact', sans-serif", animation: "glowPulse 3s ease-in-out infinite" }}>
+                    COMING SOON
+                  </span>
+                </span>
+
+                <div className="mx-auto mt-6 h-[2px] w-24 rounded-full bg-gradient-to-r from-transparent via-[#FE7F2D] to-transparent animate-shimmer" />
+
+                <h3 className="mt-6 font-display text-[20px] font-bold text-ink">Don&apos;t see your branch?</h3>
+                <p className="mx-auto mt-2 max-w-[520px] text-[15px] leading-relaxed text-muted">
+                  Reports, assignments, resumes, and interview prep already work for every branch — a
+                  dedicated numerical solver for yours is next.
+                </p>
+
+                <div className="mx-auto mt-6 flex max-w-lg flex-wrap justify-center gap-2">
+                  {OTHER_BRANCHES.split(", ").map((b, i) => (
+                    <span key={b}
+                      className={`inline-block rounded-full border border-[#FE7F2D]/20 bg-[#FE7F2D]/5 px-3 py-1 text-[12px] font-medium text-[#FE7F2D] transition-all duration-300 hover:bg-[#FE7F2D]/15 hover:scale-105 ${i === 0 ? "" : ""}`}
+                      style={{ animationDelay: `${i * 0.1}s` }}
+                    >
+                      {b}
+                    </span>
+                  ))}
+                </div>
+              </div>
             </div>
           </Reveal>
         </div>
@@ -821,7 +862,7 @@ export function RootLanding() {
             <div className="mb-16 text-center">
               <span className="mb-4 inline-block rounded-full border border-indigo/20 bg-indigo/8 px-4 py-1.5 text-[12px] font-semibold tracking-wide text-indigo">PROFESSIONALS</span>
               <h2 className="font-display text-[32px] font-bold text-ink sm:text-[38px]">
-                Already working? krackit isn&apos;t just for students
+                Already working? <Krackit /> isn&apos;t just for students
               </h2>
               <p className="mx-auto mt-3 max-w-[560px] text-[16px] text-muted">
                 Sharpen your interview game, keep your DSA fresh, and connect directly with
@@ -845,7 +886,7 @@ export function RootLanding() {
                     </div>
                     <div className="flex flex-1 flex-col justify-center p-6 sm:p-7">
                       <h3 className="font-display text-[20px] font-bold text-ink">{name}</h3>
-                      <p className="mt-1 text-[14px] text-muted">{blurb}</p>
+                      <p className="mt-1 text-[14px] text-muted"><KrackitText text={blurb} /></p>
                       <ul className="mt-4 space-y-2">
                         {tags.map((t) => (
                           <li key={t} className="flex items-start gap-2 text-[14px] leading-relaxed text-soft">
@@ -872,11 +913,11 @@ export function RootLanding() {
             <div className="mb-16 text-center">
               <span className="mb-4 inline-block rounded-full border border-amber/20 bg-amber/8 px-4 py-1.5 text-[12px] font-semibold tracking-wide text-amber">RECRUITERS</span>
               <h2 className="font-display text-[32px] font-bold text-ink sm:text-[38px]">
-                Hiring? See the tools built for recruiters
+                Hiring? <Krackit /> shows you who&apos;s actually ready
               </h2>
               <p className="mx-auto mt-3 max-w-[560px] text-[16px] text-muted">
                 Find candidates with real signal, message them directly, and run the interview —
-                all inside krackit, not stitched together from a resume PDF and a video call link.
+                all inside <Krackit />, not stitched together from a resume PDF and a video call link.
               </p>
             </div>
           </Reveal>
@@ -896,7 +937,7 @@ export function RootLanding() {
                     </div>
                     <div className="flex flex-1 flex-col justify-center p-6 sm:p-7">
                       <h3 className="font-display text-[20px] font-bold text-ink">{name}</h3>
-                      <p className="mt-1 text-[14px] text-muted">{blurb}</p>
+                      <p className="mt-1 text-[14px] text-muted"><KrackitText text={blurb} /></p>
                       <ul className="mt-4 space-y-2">
                         {tags.map((t) => (
                           <li key={t} className="flex items-start gap-2 text-[14px] leading-relaxed text-soft">
@@ -923,7 +964,7 @@ export function RootLanding() {
             <div className="mb-16 text-center">
               <span className="mb-4 inline-block rounded-full border border-cyan/20 bg-cyan/8 px-4 py-1.5 text-[12px] font-semibold tracking-wide text-cyan">FEATURES</span>
               <h2 className="font-display text-[32px] font-bold text-ink sm:text-[38px]">
-                See krackit&apos;s tools in action
+                See <Krackit />&apos;s tools in action
               </h2>
               <p className="mt-3 text-[16px] text-muted">
                 Real screenshots from the actual platform — not concept mockups. Here&apos;s what students and recruiters use every day.
@@ -939,7 +980,7 @@ export function RootLanding() {
                 </span>
                 <h3 className="font-display text-[23px] font-semibold text-ink">AI-powered assignments, reports & PPTs in your college format</h3>
                 <p className="mt-2.5 max-w-[420px] text-[15px] leading-relaxed text-muted">
-                  Snap a photo of your handwritten problem or paste a question prompt. krackit&apos;s AI generates fully formatted documents with proper headings, inline citations, and structural conventions matching your specific engineering department&apos;s style guide.
+                  Snap a photo of your handwritten problem or paste a question prompt. <Krackit />&apos;s AI generates fully formatted documents with proper headings, inline citations, and structural conventions matching your specific engineering department&apos;s style guide.
                 </p>
               </div>
               <ReportMockup />
@@ -988,12 +1029,12 @@ export function RootLanding() {
           <div className="mx-auto max-w-6xl px-5 py-20 sm:px-8 lg:px-12">
             <div className="grid items-start gap-10 md:grid-cols-2">
               <div>
-                <LogoMark size={40} />
+                <LogoMark size={150} />
                 <h2 className="mt-5 font-display text-[26px] font-bold text-ink">
                   Built by Quorium Technologies
                 </h2>
                 <p className="mt-3 max-w-[440px] text-[15px] leading-relaxed text-muted">
-                  krackit is a Quorium Technologies product, built in India for students everywhere.
+                  <Krackit /> is a Quorium Technologies product, built in India for students everywhere.
                   We believe careers should be won on proof of work — so we built the platform that
                   lets students create it and recruiters see it.
                 </p>
@@ -1041,12 +1082,12 @@ export function RootLanding() {
         <div className="mx-auto max-w-7xl px-5 pt-16 pb-8">
           <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-5">
             <div className="lg:col-span-2">
-              <Logo size={28} />
-              <p className="mt-3 max-w-[320px] text-[14px] leading-relaxed text-muted">
-                krackit is the career acceleration platform where students create, professionals
-                upskill, and recruiters hire on proof of work — not buzzwords.
+              <Logo size={150} />
+              <p className="mt-1 max-w-[320px] text-[14px] leading-relaxed text-muted">
+                <Krackit /> is the career acceleration platform where students create, professionals
+                upskill, and recruiters hire based on what&apos;s real — not what&apos;s on a résumé.
               </p>
-              <div className="mt-5 flex gap-3">
+              <div className="mt-3 flex gap-3">
                 <a href="mailto:support@krackit.in" className="flex size-9 items-center justify-center rounded-lg border border-line bg-surface text-muted transition-colors hover:border-cyan/30 hover:text-cyan">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 4L12 13 2 4"/></svg>
                 </a>
