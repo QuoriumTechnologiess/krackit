@@ -766,7 +766,7 @@ export function RootLanding() {
                     <div
                       className="relative grid overflow-hidden"
                     style={{
-                      height: 220,
+                      height: 260,
                       borderRadius: "0.5rem 2rem",
                         background: isEven
                           ? `linear-gradient(135deg, rgba(${rgb}, 0.1), rgba(${rgb}, 0.3))`
